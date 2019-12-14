@@ -1,0 +1,16 @@
+{
+  "name": "chathistory",
+  "version": "1.0.0",
+  "description": "Tracks history of chat users",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Matthew",
+  "license": "ISC",
+  "dependencies": {
+    "mongoose": "^5.7.14",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {}
+}
