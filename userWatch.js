@@ -7,40 +7,44 @@ var request     =   require('request'),
  channelList = config.channelList;
  nameList    = config.nameList;
 
- var time = new Date();
-
-mongoose.connect('mongodb://localhost/userHistory');
+ //var time = new Date();
+ 
+mongoose.set('useUnifiedTopology', true);
+mongoose.connect('mongodb://localhost/userHistory', { useNewUrlParser: true });
 
 let getViewers = function(channelList){
 
     request('https://tmi.twitch.tv/group/user/' + channelList[0] + '/chatters', function(error, response, body){
 
         let bodyparsed = JSON.parse(body);
+        let chatters = bodyparsed.chatters;
 
-        checkViewers(bodyparsed, channelList[0], nameList[0]);
+        let viewList = [].concat(chatters.vips, chatters.viewers, chatters.moderators);
+
+
+        checkViewers(viewList, channelList[0]);
 
         });
 
 };
 
-let checkViewers = function(bodyparsed, channel, name){
+let checkViewers = function(viewList, channel){
 
-    //let category = ['vips', 'moderators', 'viewers'];
+    nameList.forEach(name => {
+        if(viewList.includes(name)){
+            console.log('name marked');
+            markTime(channel, name);
+        }
+        console.log('something marked');
+    });
 
-    console.log(bodyparsed.chatters.viewers.includes("nopickles_0"));
-    
-    console.log((new Date() - time - 10000));
-
-    if(bodyparsed.chatters.viewers.includes(name)){
-        markTime(channel, name);
-    }
 };
-
 
 let markTime = function(channel, name){
 
     //add time to a mongo database
     // { channel: "hasanabi", chatter: "nopickles", timeStamp}
+    
     let obj = {
         user    : name,
         channel : channel,
@@ -53,6 +57,7 @@ let markTime = function(channel, name){
         if(err) return console.error(err);
         console.log(history);
     })
+
 };
 
 

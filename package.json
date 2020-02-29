@@ -12,5 +12,13 @@
     "mongoose": "^5.7.14",
     "request": "^2.88.0"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NoPickles/userHistory.git"
+  },
+  "bugs": {
+    "url": "https://github.com/NoPickles/userHistory/issues"
+  },
+  "homepage": "https://github.com/NoPickles/userHistory#readme"
 }
