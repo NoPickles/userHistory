@@ -9,6 +9,7 @@
   "author": "Matthew",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.17.1",
     "mongoose": "^5.7.14",
     "request": "^2.88.0"
   },
