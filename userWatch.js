@@ -33,7 +33,7 @@ app.get("/user/:twitchID", function(req, res){
         } else {
             res.send(JSON.stringify(userLogs));
         }
-        
+
     });
 });
 
@@ -43,19 +43,32 @@ app.listen(3000, function(){
 
 let getViewers = function(channelList){
 
-    request('https://tmi.twitch.tv/group/user/' + channelList[0] + '/chatters', function(error, response, body){
+    request(
+        {   
+            method: 'GET',
+            uri: 'https://tmi.twitch.tv/group/user/' + channelList[0] + '/chatters',
+            json: true
+        },
+        function(error, response, body){
+            console.log('statusCode:', response && response.statusCode);
+            if(response.statusCode == 200){
+                var chatters = body.chatters;
 
-        let bodyparsed = JSON.parse(body);
-        var chatters = bodyparsed.chatters;
+                if (typeof chatters === 'undefined'){
+                    console.log('nothing');
+                } else {
+                    let viewList = [].concat(chatters.vips, chatters.viewers, chatters.moderators);
+                    checkViewers(viewList, channelList[0]);
+                }
 
-        if ("vips" in chatters) {       
-            let viewList = [].concat(chatters.vips, chatters.viewers, chatters.moderators);
-            checkViewers(viewList, channelList[0]);
+            } else {
+                console.log('error: ' + response.statusCode);
+                console.log(body);
+            }
         }
-        
-        });
-
+    )
 };
+
 
 let checkViewers = function(viewList, channel){
 
@@ -88,4 +101,4 @@ let markTime = function(channel, name){
 };
 
 
-setInterval(() => getViewers(channelList), 1000);
+setInterval(() => getViewers(channelList), 5000);
