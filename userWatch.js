@@ -8,9 +8,11 @@ var request     =   require('request'),
     bodyParser  =   require("body-parser");
     
 
- channelList = config.channelList;
- nameList    = config.nameList;
+channelList = config.channelList;
+nameList    = config.nameList;
 
+consoleList = nameList.reduce((obj, channelName) => (obj[channelName] = "", obj), {});
+ 
  //var time = new Date();
  
 mongoose.set('useUnifiedTopology', true);
@@ -25,7 +27,7 @@ app.get('/', function(req, res){
 });
 
 app.get("/user/:twitchID", function(req, res){
-
+    
     Log.find({ user: req.params.twitchID}, function(err, userLogs){
 
         if (err) {
@@ -60,7 +62,6 @@ let getViewers = function(channelList){
                     let viewList = [].concat(chatters.vips, chatters.viewers, chatters.moderators);
                     checkViewers(viewList, channelList[0]);
                 }
-
             } else {
                 console.log('error: ' + response.statusCode);
                 console.log(body);
@@ -71,13 +72,12 @@ let getViewers = function(channelList){
 
 
 let checkViewers = function(viewList, channel){
-
+    
     nameList.forEach(name => {
         if(viewList.includes(name)){
             markTime(channel, name);
         }
     });
-
 };
 
 let markTime = function(channel, name){
@@ -88,17 +88,33 @@ let markTime = function(channel, name){
     let obj = {
         user    : name,
         channel : channel,
-        time    : new Date().toISOString()
+        time    : new Date()
     };
+
+    consoleTime(obj);
 
     var history = new Log(obj);
 
     history.save(function(err, history){
         if(err) return console.error(err);
-        console.log(history);
     })
-
 };
+
+let consoleTime = function(dateObj){
+
+    var localTime = dateObj.time.toString();
+
+    consoleList[dateObj.user] = localTime;
+
+    console.clear();
+
+    for (const key of Object.keys(consoleList)){
+        console.log(key, ":" , consoleList[key]);
+    }
+
+} 
+
+
 
 
 setInterval(() => getViewers(channelList), 5000);
