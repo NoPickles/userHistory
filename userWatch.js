@@ -11,7 +11,7 @@ var request     =   require('request'),
 channelList = config.channelList;
 nameList    = config.nameList;
 
-consoleList = nameList.reduce((obj, channelName) => (obj[channelName] = "", obj), {});
+var consoleList = new Object();
  
  //var time = new Date();
  
@@ -52,7 +52,7 @@ let getViewers = function(channelList){
             json: true
         },
         function(error, response, body){
-            console.log('statusCode:', response && response.statusCode);
+            //console.log('statusCode:', response && response.statusCode);
             if(response.statusCode == 200){
                 var chatters = body.chatters;
 
@@ -101,7 +101,7 @@ let markTime = function(channel, name){
 };
 
 let consoleTime = function(dateObj){
-
+    
     var localTime = dateObj.time.toString();
 
     consoleList[dateObj.user] = localTime;
