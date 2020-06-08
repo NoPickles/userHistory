@@ -19,11 +19,11 @@ mongoose.set('useUnifiedTopology', true);
 mongoose.connect('mongodb://localhost/userHistory', { useNewUrlParser: true });
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.set("view engine", "ejs");
+app.set("view engine", 'ejs');
 app.use(express.static(__dirname + "/public"));
 
 app.get('/', function(req, res){
-    res.send('Hello World!');
+    res.render('hello');
 });
 
 app.get("/user/:twitchID", function(req, res){
@@ -43,39 +43,59 @@ app.listen(3000, function(){
     console.log("Serving");
 });
 
-let getViewers = function(channelList){
+var scanChannels = function(channelList){
+    for (let i = 0; i < channelList.length; i++) {
+        getViewers(channelList[i])
+    }
+}
 
-    request(
-        {   
-            method: 'GET',
-            uri: 'https://tmi.twitch.tv/group/user/' + channelList[0] + '/chatters',
-            json: true
-        },
-        function(error, response, body){
-            //console.log('statusCode:', response && response.statusCode);
-            if(response.statusCode == 200){
-                var chatters = body.chatters;
+let getViewers = function(channel){
 
-                if (typeof chatters === 'undefined'){
-                    console.log('nothing');
+    var promise = new Promise(function(resolve, reject){
+
+        request(
+            {   
+                method: 'GET',
+                uri: 'https://tmi.twitch.tv/group/user/' + channel + '/chatters',
+                json: true
+            },
+            function(error, response, body){
+                //console.log('statusCode:', response && response.statusCode);
+                //TODO fix error where response is undefined
+                if(response.statusCode == 200){
+                    var chatters = body.chatters;
+
+                    if (typeof chatters === 'undefined'){
+                        console.log('nothing');
+                    } else {
+                        
+                        let viewList = [].concat(chatters.vips, chatters.viewers, chatters.moderators);
+
+                        let viewObj = {
+                            channel : channel,
+                            list    : viewList
+                        }
+
+                        resolve(viewObj);
+                    }
                 } else {
-                    let viewList = [].concat(chatters.vips, chatters.viewers, chatters.moderators);
-                    checkViewers(viewList, channelList[0]);
+                    console.log('error: ' + response.statusCode);
+                    reject();
                 }
-            } else {
-                console.log('error: ' + response.statusCode);
-                console.log(body);
             }
-        }
-    )
+        )
+
+    });
+
+    promise
+        .then(checkViewers);
 };
 
 
-let checkViewers = function(viewList, channel){
-    
+let checkViewers = function(viewObj){  
     nameList.forEach(name => {
-        if(viewList.includes(name)){
-            markTime(channel, name);
+        if(viewObj.list.includes(name)){
+            markTime(viewObj.channel, name);
         }
     });
 };
@@ -91,7 +111,10 @@ let markTime = function(channel, name){
         time    : new Date()
     };
 
-    consoleTime(obj);
+    if (obj.channel === channelList[0]) {
+        consoleTime(obj);
+    }
+    //Calls consoleTime to show the latest finds for 1st channel in channelList 
 
     var history = new Log(obj);
 
@@ -111,10 +134,10 @@ let consoleTime = function(dateObj){
     for (const key of Object.keys(consoleList)){
         console.log(key, ":" , consoleList[key]);
     }
-
-} 
-
+};
 
 
 
-setInterval(() => getViewers(channelList), 5000);
+
+setInterval(() => scanChannels(channelList), 10000);
+
