@@ -62,25 +62,26 @@ let getViewers = function(channel){
             function(error, response, body){
                 //console.log('statusCode:', response && response.statusCode);
                 //TODO fix error where response is undefined
-                if(response.statusCode == 200){
-                    var chatters = body.chatters;
-
-                    if (typeof chatters === 'undefined'){
-                        console.log('nothing');
-                    } else {
-                        
-                        let viewList = [].concat(chatters.vips, chatters.viewers, chatters.moderators);
-
-                        let viewObj = {
-                            channel : channel,
-                            list    : viewList
-                        }
-
-                        resolve(viewObj);
-                    }
-                } else {
+                if (response.statusCode === undefined) {
                     console.log('error: ' + response.statusCode);
                     reject();
+                } else {
+                    if (response.statusCode == 200) {
+                        var chatters = body.chatters;
+
+                        if (typeof chatters === 'undefined'){
+                            console.log('nothing');
+                        } else {
+                            let viewList = [].concat(chatters.vips, chatters.viewers, chatters.moderators);
+        
+                            let viewObj = {
+                                channel : channel,
+                                list    : viewList
+                            }
+        
+                            resolve(viewObj);
+                        }
+                    }
                 }
             }
         )
