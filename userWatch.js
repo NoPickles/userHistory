@@ -50,9 +50,7 @@ var scanChannels = function(channelList){
 }
 
 let getViewers = function(channel){
-
     var promise = new Promise(function(resolve, reject){
-
         request(
             {   
                 method: 'GET',
@@ -62,36 +60,32 @@ let getViewers = function(channel){
             function(error, response, body){
                 //console.log('statusCode:', response && response.statusCode);
                 //TODO fix error where response is undefined
+                
                 if (response.statusCode === undefined) {
-                    console.log('error: ' + response.statusCode);
                     reject();
                 } else {
                     if (response.statusCode == 200) {
+
                         var chatters = body.chatters;
 
-                        if (typeof chatters === 'undefined'){
-                            console.log('nothing');
-                        } else {
-                            let viewList = [].concat(chatters.vips, chatters.viewers, chatters.moderators);
+                        let viewList = [].concat(chatters.vips, chatters.viewers, chatters.moderators);
         
-                            let viewObj = {
-                                channel : channel,
-                                list    : viewList
-                            }
-        
-                            resolve(viewObj);
+                        let viewObj = {
+                            channel : channel,
+                            list    : viewList
                         }
+                        resolve(viewObj);
                     }
                 }
             }
         )
-
     });
-
+    
     promise
-        .then(checkViewers);
+        .then(checkViewers)
+        .catch(function(){
+        });
 };
-
 
 let checkViewers = function(viewObj){  
     nameList.forEach(name => {
@@ -102,10 +96,9 @@ let checkViewers = function(viewObj){
 };
 
 let markTime = function(channel, name){
-
     //add time to a mongo database
     // { channel: "hasanabi", chatter: "nopickles", timeStamp}
-    
+
     let obj = {
         user    : name,
         channel : channel,
@@ -125,12 +118,18 @@ let markTime = function(channel, name){
 };
 
 let consoleTime = function(dateObj){
-    
     var localTime = dateObj.time.toString();
+
+    //Added spacing for better readability.
+    if(dateObj.user.length <= 14){
+        for (let i = dateObj.user.length; i < 14; i++) {
+            dateObj.user += " ";
+        }
+    }
 
     consoleList[dateObj.user] = localTime;
 
-    console.clear();
+    console.clear()
 
     for (const key of Object.keys(consoleList)){
         console.log(key, ":" , consoleList[key]);
@@ -140,5 +139,5 @@ let consoleTime = function(dateObj){
 
 
 
-setInterval(() => scanChannels(channelList), 10000);
+setInterval(() => scanChannels(channelList), 10000); //DOn't forget 
 
