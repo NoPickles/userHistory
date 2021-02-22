@@ -11,10 +11,8 @@ var request     =   require('request'),
 channelList = config.channelList;
 nameList    = config.nameList;
 
-var consoleList = new Object();
- 
- //var time = new Date();
- 
+var conList = new Object();
+
 mongoose.set('useUnifiedTopology', true);
 mongoose.connect('mongodb://localhost/userHistory', { useNewUrlParser: true });
 
@@ -44,10 +42,13 @@ app.listen(3000, function(){
 });
 
 var scanChannels = function(channelList){
+
+    console.clear()
+
     for (let i = 0; i < channelList.length; i++) {
         getViewers(channelList[i])
     }
-}
+};
 
 let getViewers = function(channel){
     var promise = new Promise(function(resolve, reject){
@@ -83,6 +84,7 @@ let getViewers = function(channel){
     
     promise
         .then(checkViewers)
+        .then(displayTime)
         .catch(function(){
         });
 };
@@ -90,27 +92,24 @@ let getViewers = function(channel){
 let checkViewers = function(viewObj){  
     nameList.forEach(name => {
         if(viewObj.list.includes(name)){
-            markTime(viewObj.channel, name);
+
+            let logObj = {
+                user    : name,
+                channel : viewObj.channel,
+                time    : new Date()
+            };
+            if(logObj.channel === config.channelList[0]){
+                consoleTime(logObj);
+            }
+            saveTime(logObj);
         }
     });
 };
 
-let markTime = function(channel, name){
-    //add time to a mongo database
+let saveTime = function(object){
+    //save time to mongo db
     // { channel: "hasanabi", chatter: "nopickles", timeStamp}
-
-    let obj = {
-        user    : name,
-        channel : channel,
-        time    : new Date()
-    };
-
-    if (obj.channel === channelList[0]) {
-        consoleTime(obj);
-    }
-    //Calls consoleTime to show the latest finds for 1st channel in channelList 
-
-    var history = new Log(obj);
+    var history = new Log(object);
 
     history.save(function(err, history){
         if(err) return console.error(err);
@@ -118,26 +117,29 @@ let markTime = function(channel, name){
 };
 
 let consoleTime = function(dateObj){
-    var localTime = dateObj.time.toString();
+    //Save list of recent logs
+    let consolObj = dateObj;
+    var localTime = consolObj.time.toString();
 
-    //Added spacing for better readability.
-    if(dateObj.user.length <= 14){
-        for (let i = dateObj.user.length; i < 14; i++) {
-            dateObj.user += " ";
+    conList[consolObj.user] = localTime;
+};
+
+let displayTime = function(){
+
+    let displayList = conList;
+
+    for (const key of Object.keys(displayList)){
+
+        var middle = "";
+
+        for (let i = key.length; i < 15; i++){
+            middle += " ";
         }
-    }
-
-    consoleList[dateObj.user] = localTime;
-
-    console.clear()
-
-    for (const key of Object.keys(consoleList)){
-        console.log(key, ":" , consoleList[key]);
+        console.log(key, middle , ':', displayList[key]);
     }
 };
 
 
 
-
-setInterval(() => scanChannels(channelList), 10000); //DOn't forget 
+setInterval(() => scanChannels(channelList), 5000); //DOn't forget 
 
