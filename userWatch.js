@@ -43,8 +43,6 @@ app.listen(3000, function(){
 
 var scanChannels = function(channelList){
 
-    console.clear()
-
     for (let i = 0; i < channelList.length; i++) {
         getViewers(channelList[i])
     }
@@ -125,7 +123,7 @@ let consoleTime = function(dateObj){
 };
 
 let displayTime = function(){
-
+    console.clear()
     let displayList = conList;
 
     for (const key of Object.keys(displayList)){
