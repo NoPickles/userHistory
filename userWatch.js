@@ -137,4 +137,4 @@ let displayTime = function(){
     }
 };
 
-setInterval(() => scanChannels(channelList), 2000); //DOn't forget 
+setInterval(() => scanChannels(channelList), 10000); //DOn't forget 
