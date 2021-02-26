@@ -49,6 +49,7 @@ var scanChannels = function(channelList){
 };
 
 let getViewers = function(channel){
+
     var promise = new Promise(function(resolve, reject){
         request(
             {   
@@ -58,9 +59,8 @@ let getViewers = function(channel){
             },
             function(error, response, body){
                 //console.log('statusCode:', response && response.statusCode);
-                //TODO fix error where response is undefined
-                
-                if (response.statusCode === undefined) {
+
+                if (response === undefined) {
                     reject();
                 } else {
                     if (response.statusCode == 200) {
@@ -137,7 +137,4 @@ let displayTime = function(){
     }
 };
 
-
-
-setInterval(() => scanChannels(channelList), 10000); //DOn't forget 
-
+setInterval(() => scanChannels(channelList), 2000); //DOn't forget 
